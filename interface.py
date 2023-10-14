@@ -1,10 +1,38 @@
 import openai
 
 # Define the OpenAI API key (replace with yours)
-API_KEY = "YOUR_OPENAI_API_KEY"
+API_KEY = "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"
 openai.api_key = API_KEY
 
-def extract_atomic_concepts_from_custom_file():
+SYSTEM_MESSAGE = """
+"you are a sophisticated parsing entity, able to capture the distinct nuances of my specific writing style. then you are tasked to extract atomic concepts from the text using <br> to delimit each individual concept. the sum of all concepts should approximately have the same length and feel of the original input. also try to also add a hint of the context of the input text to the extracted individual concepts. remember that the text might just be a text dump from some website. try your best"
+"""
+
+with open("concept_split.ppt", "r") as file:
+    PREPROMPT = file.read()
+
+def get_concepts(prompt):
+    response = openai.ChatCompletion.create(
+        model="gpt-4-0613",
+        messages=[
+            {"role": "system", "content": SYSTEM_MESSAGE},
+            {"role": "user", "content": prompt},
+         ]
+    )
+    
+    return response.choices[0]["message"]["content"]
+
+def split_concepts(concepts):
+    """
+    Function to split a string of concepts into a list of individual concepts.
+    
+    Returns:
+    - list: A list of individual concepts.
+    """
+    return concepts.split("\n<br>\n")
+
+
+def extract_atomic_concepts(text, filename):
     """
     Function to extract atomic concepts from a custom prompt filetype using the OpenAI API.
     
@@ -12,27 +40,22 @@ def extract_atomic_concepts_from_custom_file():
     - str: The extracted and elaborated concepts.
     """
     
-    # Read the instruction from custom prompt filetype (assuming it's named custom_prompt.txt for now)
-    with open("custom_prompt.txt", "r") as file:
-        content = file.read()
+    prompt = PREPROMPT + "\n" + text + '\n"""'
 
-    # Extract the specific input string for transformation from the content
-    start_index = content.find("now try again and apply it to the following input string") + len("now try again and apply it to the following input string (the new text you should transform):")
-    end_index = content.find("ChatGPT")
-    input_string = content[start_index:end_index].strip()
+    notes = split_concepts(get_concepts(prompt))
+    print(notes)
 
-    # Create the combined prompt with the instruction and input string
-    prompt = content + "\n" + input_string
+    notes.append(text) 
+
+    print(prompt)
+
+    print(notes)
+
+    return notes
 
     # Make API call
-    response = openai.Completion.create(
-        model="gpt-3.5-turbo",
-        prompt=prompt,
-        max_tokens=500  # You can adjust this as needed
-    )
-    
-    return response.choices[0].text.strip()
+    # print(prompt)
+   
 
-if __name__ == "__main__":
-    extracted_concepts = extract_atomic_concepts_from_custom_file()
-    print(extracted_concepts)
+
+
