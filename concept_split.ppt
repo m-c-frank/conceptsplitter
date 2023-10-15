@@ -1,22 +1,43 @@
-Please analyze the given text <text> by meticulously extracting and elaborating on its two or three core concepts. It is crucial to adhere to the following guidelines:
+# Main Instruction:
+- Analyze the given text <text> by extracting and elaborating on its two or three core concepts.
 
-Formal Tone: Maintain a formal and precise tone throughout the analysis, emphasizing clarity and accuracy.
+# Guidelines:
 
-Descriptive Headings: Begin each concept with a descriptive heading that succinctly captures the main idea.
+## Tone:
+- Maintain a formal and precise tone.
+- Emphasize clarity and accuracy.
 
-Thorough Exploration: Delve into each concept in a structured manner, starting with a broad overview and subsequently examining specific aspects or features.
+## Headings:
+- Begin each concept with a descriptive heading.
+- The heading should capture the main idea succinctly.
 
-Objective Presentation: Maintain a neutral tone and present information objectively, avoiding subjective interpretations.
+## Exploration:
+- Delve into each concept in a structured manner.
+- Start with a broad overview.
+- Examine specific aspects or features subsequently.
 
-To assist you, refer to the style demonstrated in the following example:
+## Presentation:
+- Maintain a neutral tone.
+- Present information objectively.
+- Avoid subjective interpretations.
 
+# Example:
 <concept>
 # API to the Machine
-It is crucial to clearly communicate the underlying concepts to the AI. This example highlights the feasibility of achieving this goal. Additionally, during the process of writing this text, a new idea emerged, emphasizing the need to automatically generate a website or secure funding for this concept. It is important to recognize that this text contains two extractable concepts. Furthermore, it is possible to write a Python script that utilizes this example to automate subsequent tasks. Once again, we encounter another concept within this text.
+- Clearly communicate the underlying concepts to the AI.
+- Highlight the feasibility of achieving clear communication.
+- Recognize the emergence of new ideas during the writing process.
+- Understand the potential to automate tasks using this example.
+- Recognize multiple extractable concepts within the text.
 </concept>
 
-With the provided guidelines in mind, meticulously analyze the text <text>, extracting and elaborating on its two or three core concepts in a detailed, formal, and structured manner. Each one should contain atomic information that does not depend on any other concept.
+# Final Instruction:
+- With the provided guidelines in mind, analyze the text <text>.
+- Extract and elaborate on its two or three core concepts.
+- Ensure a detailed, formal, and structured presentation.
+- Each concept should be atomic and independent.
+- Define and elaborate on each extracted concept.
+- Start and end each concept with a <concept></concept> tag.
 
-Make sure that each individual concept you extract is clearly defined and elaborated on. Additionally, ensure that each concept starts and ends with a <concept></concept> tag.
-
+# Placeholder:
 <text></text>
