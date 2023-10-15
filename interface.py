@@ -1,19 +1,24 @@
 import openai
 import re
+import os
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
 
-# Define the OpenAI API key (replace with yours)
-API_KEY = "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"
+# Fetch the OpenAI API key from environment variable
+API_KEY = os.environ.get("OPENAI_API_KEY")
+if not API_KEY:
+    raise ValueError("Please set the OPENAI_API_KEY in the .env file.")
 openai.api_key = API_KEY
+
 
 SYSTEM_MESSAGE = """
 "you are a sophisticated parsing entity, able to capture the distinct nuances of my specific writing style. then you are tasked to extract atomic concepts from the text using <br> to delimit each individual concept. the sum of all concepts should approximately have the same length and feel of the original input. also try to also add a hint of the context of the input text to the extracted individual concepts. remember that the text might just be a text dump from some website. try your best"
 """
 
-
 with open("concept_split.ppt", "r") as file:
     PREPROMPT = file.read()
-
 
 def split_concepts(text):
     # Regular expression to match content between <concept></concept> tags
@@ -31,8 +36,6 @@ def get_concepts(prompt):
     )
     
     return response.choices[0]["message"]["content"]
-
-
 
 def extract_atomic_concepts(text, filename):
     """
@@ -54,10 +57,3 @@ def extract_atomic_concepts(text, filename):
     print(notes)
 
     return notes
-
-    # Make API call
-    # print(prompt)
-   
-
-
-
