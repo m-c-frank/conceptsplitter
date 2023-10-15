@@ -17,7 +17,7 @@ To assist you, refer to the style demonstrated in the following example:
 It is crucial to clearly communicate the underlying concepts to the AI. This example highlights the feasibility of achieving this goal. Additionally, during the process of writing this text, a new idea emerged, emphasizing the need to automatically generate a website or secure funding for this concept. It is important to recognize that this text contains two extractable concepts. Furthermore, it is possible to write a Python script that utilizes this example to automate subsequent tasks. Once again, we encounter another concept within this text.
 </concept>
 
-With the provided guidelines in mind, meticulously analyze the text <text>, extracting and elaborating on its two or three core concepts in a detailed, formal, and structured manner.
+With the provided guidelines in mind, meticulously analyze the text <text>, extracting and elaborating on its two or three core concepts in a detailed, formal, and structured manner. Each one should contain atomic information that does not depend on any other concept.
 
 Make sure that each individual concept you extract is clearly defined and elaborated on. Additionally, ensure that each concept starts and ends with a <concept></concept> tag.
 
