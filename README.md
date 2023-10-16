@@ -54,8 +54,8 @@ conceptsplitter is a project designed to extract atomic concepts from a given te
 3. Extracted concepts will be saved as individual text files in the `~/desktop/atomic_notes` directory.
 
 ## Related Tools
-
-**Note Utilities Ecosystem**: If you're looking for a way to automatically generate the text dumps that conceptsplitter processes, check out our [textdownloader](https://github.com/m-c-frank/textdownloader) browser extension. It's a part of the growing Note Utilities Ecosystem designed to streamline and enhance your note-taking and information processing workflows. Dive in and explore more tools that can elevate your productivity!
+<!--START_TOKEN-->
+<!--END_TOKEN-->
 
 ## Contributing
 
