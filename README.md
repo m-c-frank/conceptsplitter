@@ -63,7 +63,7 @@ Contributions to the conceptsplitter project or the note utilities ecosystem are
 
 ## License
 
-The conceptsplitter project is open-source and available under the [GOS License](LICENSE.md).
+The textdownloader browser extension is open-source and licensed under the [GOS License](https://github.com/m-c-frank/textdownloader/blob/main/LICENCE.md).
 
 ## Credits
 
