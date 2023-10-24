@@ -22,8 +22,10 @@ def extract_concepts_from_directory(input_directory):
 
     concepts = []
     for doc in docs:
+        print("Extracting concepts from", doc)
         extracted_concept_titles = get_concept_titles(doc.page_content)
         for concept_title in extracted_concept_titles:
+            print("Extracting concept", concept_title, "of", extracted_concept_titles)
             result = get_concept_content(
                 concept_title=concept_title, source_context=doc.page_content
             )
@@ -36,6 +38,8 @@ def extract_concepts_from_directory(input_directory):
                     "tags": concept_tags,
                 }
             )
+
+        print("Extracting linked concepts")
 
         result = get_linked_concept_content(
             concepts=concepts, source_context=doc.page_content
@@ -52,6 +56,7 @@ def extract_concepts_from_directory(input_directory):
             }
         )
 
+    print("Extracted", len(concepts), "concepts")
     return concepts
 
 

@@ -27,18 +27,9 @@ you are a sophisticated parsing entity. you are tasked to extract atomic concept
 """
 
 SYSTEM_MESSAGE_LINKER = """
-you are a sophisticated parsing entity. you are tasked with identifying and explaining the links between concepts in a source document in a clear and concise manner with the given information.
+you are a sophisticated parsing entity. you are tasked with identifying and explaining the links between concepts in a source document in a clear and concise manner with the given information. Never just state that they are linked. Instead reimagine how they are linked in a creative way. Imagine how you are drawing from you vast knowledge and identify novel ways on how the concepts are linked.
 """
 
-with open("concept_split.ppt", "r") as file:
-    PREPROMPT = file.read()
-
-
-def split_concepts(text):
-    # Regular expression to match content between <concept></concept> tags
-    pattern = r"<concept>(.*?)</concept>"
-    concepts = re.findall(pattern, text, re.DOTALL)
-    return concepts
 
 
 def split_concept_titles(concept_titles):
@@ -77,8 +68,6 @@ def get_concept_title(text):
         function_call={"name": "write_title"},
     )
 
-    print(response)
-
     return json.loads(response.choices[0]["message"]["function_call"]["arguments"])[
         "title"
     ]
@@ -110,8 +99,6 @@ def get_concept_titles(prompt):
         function_call={"name": "process_atomic_concepts"},
     )
 
-    print(response)
-
     return split_concept_titles(
         json.loads(response.choices[0]["message"]["function_call"]["arguments"])
     )
@@ -134,7 +121,7 @@ def get_concept_content(concept_title, source_context):
                     "properties": {
                         "concept_content": {
                             "type": "string",
-                            "description": "Approximately 250 words which explains the concept.",
+                            "description": "Approximately 100 words which explains the concept.",
                         },
                         "concept_tags": {
                             "type": "string",
@@ -147,8 +134,6 @@ def get_concept_content(concept_title, source_context):
         ],
         function_call={"name": "write_concept_to_file"},
     )
-
-    print(response)
 
     concept_content = json.loads(
         response.choices[0]["message"]["function_call"]["arguments"]
@@ -186,7 +171,7 @@ def get_linked_concept_content(concepts, source_context):
                     "properties": {
                         "concept_content": {
                             "type": "string",
-                            "description": "Approximately 250 words in which the links between the given concepts are explained using the source document and additional information.",
+                            "description": "Approximately 100 words in which the links between the given concepts are explained using the source document and additional information.",
                         },
                         "concept_tags": {
                             "type": "string",
@@ -200,8 +185,6 @@ def get_linked_concept_content(concepts, source_context):
         function_call={"name": "write_to_file"},
     )
 
-    print(response)
-
     concept_content = json.loads(
         response.choices[0]["message"]["function_call"]["arguments"]
     )["concept_content"]
@@ -213,25 +196,3 @@ def get_linked_concept_content(concepts, source_context):
         concept_tags = ""
 
     return concept_content, split_concept_tags(concept_tags)
-
-
-def extract_atomic_concepts(text, filename):
-    """
-    Function to extract atomic concepts from a custom prompt filetype using the OpenAI API.
-
-    Returns:
-    - str: The extracted and elaborated concepts.
-    """
-
-    prompt = PREPROMPT.replace("<text></text>", f"<text>{text}</text>")
-
-    notes = split_concepts(get_concept_titles(prompt))
-    print(notes)
-
-    notes.append(text)
-
-    print(prompt)
-
-    print(notes)
-
-    return notes
