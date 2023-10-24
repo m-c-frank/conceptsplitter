@@ -1,42 +1,99 @@
 import os
-import re
-from interface import extract_atomic_concepts
+import argparse
+from langchain.document_loaders import ObsidianLoader
+from interface import (
+    get_concept_titles,
+    get_concept_content,
+    get_linked_concept_content,
+    get_concept_title,
+)
 
-# Constants
-SOURCE_PATH = os.path.expanduser("~/Downloads")
-RESULT_PATH = os.path.expanduser("~/desktop/atomic_notes")
 
-def get_text_files(directory):
-    """Return a list of files that have the 'text-' prefix."""
-    return [f for f in os.listdir(directory) if f.startswith("text-")]
+def ensure_directory_exists(directory):
+    """Ensure the directory exists. If not, create it."""
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
-def read_file(filepath):
-    """Read and return content of a file."""
-    with open(filepath, 'r') as file:
-        return file.read()
 
-def save_concepts(concepts, filename):
-    """Save extracted concepts to a file."""
+def extract_concepts_from_directory(input_directory):
+    """Extract concepts from the Obsidian markdown files in the provided directory."""
+    loader = ObsidianLoader(path=input_directory)
+    docs = loader.load()
+
+    concepts = []
+    for doc in docs:
+        extracted_concept_titles = get_concept_titles(doc.page_content)
+        for concept_title in extracted_concept_titles:
+            result = get_concept_content(
+                concept_title=concept_title, source_context=doc.page_content
+            )
+            concept_content, concept_tags = result
+
+            concepts.append(
+                {
+                    "title": concept_title,
+                    "content": concept_content,
+                    "tags": concept_tags,
+                }
+            )
+
+        result = get_linked_concept_content(
+            concepts=concepts, source_context=doc.page_content
+        )
+
+        concept_content, concept_tags = result
+
+        concepts.append(
+            {
+                "title": get_concept_title(concept_content),
+                "content": concept_content,
+                "tags": concept_tags,
+                "metadata": doc.metadata,
+            }
+        )
+
+    return concepts
+
+
+def generate_notes(concepts, output_directory):
+    """Generate individual notes for each extracted concept."""
+    ensure_directory_exists(output_directory)
+
     for concept in concepts:
-        title = filename.split("-")[1].replace(".txt", "") + "-" + concept[:20].replace(" ", "_").strip() + ".txt"
-        result_path = os.path.join(RESULT_PATH, title)
-        with open(result_path, 'w') as file:
-            file.write(concept)
-        
+        concept_title = concept["title"]
+        concept_content = concept["content"]
+        note_content = f"# {concept_title}\n\n{concept_content}"
+        note_filename = os.path.join(
+            output_directory, f"{concept_title.replace(' ','_')}.md"
+        )
+        with open(note_filename, "w") as note_file:
+            note_file.write(note_content)
+
+
+def generate_link_file(concepts, output_directory):
+    """Generate a file that describes how the concepts were linked in the original markdown files."""
+    pass
+
 
 def main():
-    files = get_text_files(SOURCE_PATH)
-    print(f"Found {len(files)} text files to process.")
+    """Main function to handle command-line inputs and execute the concept extraction."""
+    parser = argparse.ArgumentParser(description="Concept Extraction from Markdown")
+    parser.add_argument(
+        "input_directory", help="Path to the directory containing markdown files"
+    )
+    parser.add_argument(
+        "--output",
+        default="./output",
+        help="Path to the output directory where the notes will be saved",
+    )
 
-    for filename in files:
-        print(f"Processing: {filename}")
-        content = read_file(os.path.join(SOURCE_PATH, filename))
-        print(content)
-        concepts = extract_atomic_concepts(content, filename)
-        print(concepts)
-        save_concepts(concepts, filename)
-        print(f"Saved extracted concepts from {filename}.")
-        exit()
+    args = parser.parse_args()
+
+    concepts = extract_concepts_from_directory(args.input_directory)
+
+    generate_notes(concepts, args.output)
+    generate_link_file(concepts, args.output)
+
 
 if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@ import openai
 import re
 import os
 from dotenv import load_dotenv
+import json
 
 # Load environment variables from .env file
 load_dotenv()
@@ -14,43 +15,220 @@ openai.api_key = API_KEY
 
 
 SYSTEM_MESSAGE = """
-"you are a sophisticated parsing entity, able to capture the distinct nuances of my specific writing style. then you are tasked to extract atomic concepts from the text using <br> to delimit each individual concept. the sum of all concepts should approximately have the same length and feel of the original input. also try to also add a hint of the context of the input text to the extracted individual concepts. remember that the text might just be a text dump from some website. try your best"
+you are a sophisticated parsing entity, able to capture the distinct nuances of my specific writing style. then you are tasked to extract atomic concepts from the text. the sum of all concepts should approximately have the same length and feel of the original input. remember that the text might just be a text dump from some website. try your best
+"""
+
+SYSTEM_MESSAGE_TITLE = """
+you are a sophisticated parsing entity, your task is to just find a nice short but concise title for some text which will be provided to you.
+"""
+
+SYSTEM_MESSAGE_CONTENT = """
+you are a sophisticated parsing entity. you are tasked to extract atomic concepts from the text based on the name of a concept and the context which will be provided.
+"""
+
+SYSTEM_MESSAGE_LINKER = """
+you are a sophisticated parsing entity. you are tasked with identifying and explaining the links between concepts in a source document in a clear and concise manner with the given information.
 """
 
 with open("concept_split.ppt", "r") as file:
     PREPROMPT = file.read()
 
+
 def split_concepts(text):
     # Regular expression to match content between <concept></concept> tags
-    pattern = r'<concept>(.*?)</concept>'
+    pattern = r"<concept>(.*?)</concept>"
     concepts = re.findall(pattern, text, re.DOTALL)
     return concepts
 
-def get_concepts(prompt):
+
+def split_concept_titles(concept_titles):
+    # example input : {'concept_titles': 'AI Simple Tags, Explaining Chain of Thoughts, Saving Associations'}
+    return [i.strip() for i in concept_titles["concept_titles"].split(",")]
+
+def split_concept_tags(concept_tags):
+    # example input : {'concept_tags': 'AI Simple Tags, Explaining Chain of Thoughts, Saving Associations'}
+    return [i.strip() for i in concept_tags.split(",")]
+
+
+def get_concept_title(text):
+    prompt = f"I need to find a title for the following text. Please make sure its concise and clear. Rarely use more than 4 words. The text in question: {text}"
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": SYSTEM_MESSAGE_TITLE},
+            {"role": "user", "content": prompt},
+        ],
+        functions=[
+            {
+                "name": "write_title",
+                "description": "takes the title and writes it to the index",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "title": {
+                            "type": "string",
+                            "description": "The concise and clear title which perfectly matches the texts content.",
+                        },
+                    },
+                },
+                "required": ["title"],
+            },
+        ],
+        function_call={"name": "write_title"},
+    )
+
+    print(response)
+
+    return json.loads(response.choices[0]["message"]["function_call"]["arguments"])[
+        "title"
+    ]
+
+
+def get_concept_titles(prompt):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": SYSTEM_MESSAGE},
             {"role": "user", "content": prompt},
-         ]
+        ],
+        functions=[
+            {
+                "name": "process_atomic_concepts",
+                "description": "takes the names of the extracted atomic concepts and processes them further.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "concept_titles": {
+                            "type": "string",
+                            "description": "The main but abstracted concepts within the provided text. Short but clear titles and comma delimited.",
+                        },
+                    },
+                },
+                "required": ["concept_titles"],
+            },
+        ],
+        function_call={"name": "process_atomic_concepts"},
     )
-    
-    return response.choices[0]["message"]["content"]
+
+    print(response)
+
+    return split_concept_titles(
+        json.loads(response.choices[0]["message"]["function_call"]["arguments"])
+    )
+
+
+def get_concept_content(concept_title, source_context):
+    prompt = f"The title of the concept i want you to explain is {concept_title}. Explain it fundamentally, only use the context to see how it could be applied. The context was: {source_context}"
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": SYSTEM_MESSAGE_CONTENT},
+            {"role": "user", "content": prompt},
+        ],
+        functions=[
+            {
+                "name": "write_concept_to_file",
+                "description": "takes the description or definition of a concept and writes it to a file.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "concept_content": {
+                            "type": "string",
+                            "description": "Approximately 250 words which explains the concept.",
+                        },
+                        "concept_tags": {
+                            "type": "string",
+                            "description": "3 to 10 single word tags that describe the content of this concept. Must be comma separated.",
+                        },
+                    },
+                },
+                "required": ["concept_content", "concept_tags"],
+            },
+        ],
+        function_call={"name": "write_concept_to_file"},
+    )
+
+    print(response)
+
+    concept_content = json.loads(
+        response.choices[0]["message"]["function_call"]["arguments"]
+    )["concept_content"]
+    try:
+        concept_tags = json.loads(
+            response.choices[0]["message"]["function_call"]["arguments"]
+        )["concept_tags"]
+    except:
+        concept_tags = ""
+
+
+    return concept_content, split_concept_tags(concept_tags)
+
+
+def get_linked_concept_content(concepts, source_context):
+    concepts_info = "\n".join(
+        [f"title: {concept['title']}, tags: {concept['tags']}" for concept in concepts]
+    )
+
+    prompt = f"""Okay so please with the following information on the concepts ({concepts_info}); i have extracted from the source context ({source_context}). please identify a nice and elegant way on how the concepts were linked in the source context"""
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": SYSTEM_MESSAGE_LINKER},
+            {"role": "user", "content": prompt},
+        ],
+        functions=[
+            {
+                "name": "write_to_file",
+                "description": "takes a linked concept note and writes it to a file.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "concept_content": {
+                            "type": "string",
+                            "description": "Approximately 250 words in which the links between the given concepts are explained using the source document and additional information.",
+                        },
+                        "concept_tags": {
+                            "type": "string",
+                            "description": "3 to 10 single word tags that describe the content of this new linked concept. Must be comma separated.",
+                        },
+                    },
+                },
+                "required": ["concept_content", "concept_tags"],
+            },
+        ],
+        function_call={"name": "write_to_file"},
+    )
+
+    print(response)
+
+    concept_content = json.loads(
+        response.choices[0]["message"]["function_call"]["arguments"]
+    )["concept_content"]
+    try:
+        concept_tags = json.loads(
+            response.choices[0]["message"]["function_call"]["arguments"]
+        )["concept_tags"]
+    except:
+        concept_tags = ""
+
+    return concept_content, split_concept_tags(concept_tags)
+
 
 def extract_atomic_concepts(text, filename):
     """
     Function to extract atomic concepts from a custom prompt filetype using the OpenAI API.
-    
+
     Returns:
     - str: The extracted and elaborated concepts.
     """
-    
+
     prompt = PREPROMPT.replace("<text></text>", f"<text>{text}</text>")
 
-    notes = split_concepts(get_concepts(prompt))
+    notes = split_concepts(get_concept_titles(prompt))
     print(notes)
 
-    notes.append(text) 
+    notes.append(text)
 
     print(prompt)
 
