@@ -68,9 +68,8 @@ def get_concept_title(text):
         function_call={"name": "write_title"},
     )
 
-    return json.loads(response.choices[0]["message"]["function_call"]["arguments"])[
-        "title"
-    ]
+    title = json.loads(response.choices[0]["message"]["function_call"]["arguments"]).get("title", False)
+    return title if title else False
 
 
 def get_concept_titles(prompt):
@@ -99,9 +98,9 @@ def get_concept_titles(prompt):
         function_call={"name": "process_atomic_concepts"},
     )
 
-    return split_concept_titles(
-        json.loads(response.choices[0]["message"]["function_call"]["arguments"])
-    )
+
+
+    return json.loads(response.choices[0]["message"]["function_call"]["arguments"])
 
 
 def get_concept_content(concept_title, source_context):
@@ -135,18 +134,17 @@ def get_concept_content(concept_title, source_context):
         function_call={"name": "write_concept_to_file"},
     )
 
+    print(response[0]["message"])
+
     concept_content = json.loads(
         response.choices[0]["message"]["function_call"]["arguments"]
-    )["concept_content"]
-    try:
-        concept_tags = json.loads(
-            response.choices[0]["message"]["function_call"]["arguments"]
-        )["concept_tags"]
-    except:
-        concept_tags = ""
+    ).get("concept_content", False)
 
+    concept_tags = json.loads(
+        response.choices[0]["message"]["function_call"]["arguments"]
+    ).get("concept_tags", False)
 
-    return concept_content, split_concept_tags(concept_tags)
+    return concept_content, concept_tags
 
 
 def get_linked_concept_content(concepts, source_context):
@@ -187,12 +185,9 @@ def get_linked_concept_content(concepts, source_context):
 
     concept_content = json.loads(
         response.choices[0]["message"]["function_call"]["arguments"]
-    )["concept_content"]
-    try:
-        concept_tags = json.loads(
-            response.choices[0]["message"]["function_call"]["arguments"]
-        )["concept_tags"]
-    except:
-        concept_tags = ""
+    ).get("concept_content", False)
+    concept_tags = json.loads(
+        response.choices[0]["message"]["function_call"]["arguments"]
+    ).get("concept_tags", False)
 
-    return concept_content, split_concept_tags(concept_tags)
+    return concept_content, concept_tags
