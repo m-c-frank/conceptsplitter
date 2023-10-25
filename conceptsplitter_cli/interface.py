@@ -1,4 +1,4 @@
-import openai
+import neuralapi
 import re
 import os
 from dotenv import load_dotenv
@@ -7,11 +7,11 @@ import json
 # Load environment variables from .env file
 load_dotenv()
 
-# Fetch the OpenAI API key from environment variable
+# Fetch the neuralapi API key from environment variable
 API_KEY = os.environ.get("OPENAI_API_KEY")
 if not API_KEY:
     raise ValueError("Please set the OPENAI_API_KEY in the .env file.")
-openai.api_key = API_KEY
+neuralapi.api_key = API_KEY
 
 
 SYSTEM_MESSAGE = """
@@ -43,7 +43,7 @@ def split_concept_tags(concept_tags):
 
 def get_concept_title(text):
     prompt = f"I need to find a title for the following text. Please make sure its concise and clear. Rarely use more than 4 words. The text in question: {text}"
-    response = openai.ChatCompletion.create(
+    response = neuralapi.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": SYSTEM_MESSAGE_TITLE},
@@ -74,7 +74,7 @@ def get_concept_title(text):
 
 
 def get_concept_titles(prompt):
-    response = openai.ChatCompletion.create(
+    response = neuralapi.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": SYSTEM_MESSAGE},
@@ -106,7 +106,7 @@ def get_concept_titles(prompt):
 
 def get_concept_content(concept_title, source_context):
     prompt = f"The title of the concept i want you to explain is {concept_title}. Explain it fundamentally, only use the context to see how it could be applied. The context was: {source_context}"
-    response = openai.ChatCompletion.create(
+    response = neuralapi.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": SYSTEM_MESSAGE_CONTENT},
@@ -156,7 +156,7 @@ def get_linked_concept_content(concepts, source_context):
 
     prompt = f"""Okay so please with the following information on the concepts ({concepts_info}); i have extracted from the source context ({source_context}). please identify a nice and elegant way on how the concepts were linked in the source context"""
 
-    response = openai.ChatCompletion.create(
+    response = neuralapi.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": SYSTEM_MESSAGE_LINKER},
