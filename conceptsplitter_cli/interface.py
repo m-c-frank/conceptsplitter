@@ -34,9 +34,13 @@ you are a sophisticated parsing entity. you are tasked with identifying and expl
 
 def split_concept_titles(concept_titles):
     # example input : {'concept_titles': 'AI Simple Tags, Explaining Chain of Thoughts, Saving Associations'}
+    if not concept_titles:
+        return concept_titles
     return [i.strip() for i in concept_titles["concept_titles"].split(",")]
 
 def split_concept_tags(concept_tags):
+    if not concept_tags:
+        return concept_tags
     # example input : {'concept_tags': 'AI Simple Tags, Explaining Chain of Thoughts, Saving Associations'}
     return [i.strip() for i in concept_tags.split(",")]
 
@@ -133,8 +137,6 @@ def get_concept_content(concept_title, source_context):
         ],
         function_call={"name": "write_concept_to_file"},
     )
-
-    print(response[0]["message"])
 
     concept_content = json.loads(
         response.choices[0]["message"]["function_call"]["arguments"]

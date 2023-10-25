@@ -124,8 +124,7 @@ def test_get_concept_content_edge_cases(mocker, concept, input_text, mock_data, 
 
     # Act
     content, tags = get_concept_content(concept, input_text)
-    if tags:
-        tags = split_concept_tags(tags)
+    tags = split_concept_tags(tags)
 
     # Assert
     assert content == expected_content
