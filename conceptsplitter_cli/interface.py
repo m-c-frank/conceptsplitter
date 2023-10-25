@@ -10,7 +10,7 @@ load_dotenv()
 # Fetch the neuralapi API key from environment variable
 API_KEY = os.environ.get("OPENAI_API_KEY")
 if not API_KEY:
-    raise ValueError("Please set the OPENAI_API_KEY in the .env file.")
+    raise ValueError("Please set the OPENAI_API_KEY in your environment.")
 neuralapi.api_key = API_KEY
 
 
@@ -108,7 +108,7 @@ def get_concept_titles(prompt):
 
 
 def get_concept_content(concept_title, source_context):
-    prompt = f"The title of the concept i want you to explain is {concept_title}. Explain it fundamentally, only use the context to see how it could be applied. The context was: {source_context}"
+    prompt = f"The title of the concept i want you to explain is {concept_title}. Explain it fundamentally, only use the context to understsand how to elaborate the idea but be original and creative: {source_context}"
     response = neuralapi.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -154,7 +154,7 @@ def get_linked_concept_content(concepts, source_context):
         [f"title: {concept['title']}, tags: {concept['tags']}" for concept in concepts]
     )
 
-    prompt = f"""Okay so please with the following information on the concepts ({concepts_info}); i have extracted from the source context ({source_context}). please identify a nice and elegant way on how the concepts were linked in the source context"""
+    prompt = f"""Okay so please with the following information on the concepts ({concepts_info}); i have extracted from the source context ({source_context}). please identify a nice and elegant way on how the concepts are linked."""
 
     response = neuralapi.ChatCompletion.create(
         model="gpt-3.5-turbo",
