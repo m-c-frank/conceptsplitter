@@ -57,10 +57,12 @@ conceptsplitter is a project designed to extract atomic concepts from a given te
 <!--START_TOKEN-->
 **Note Utilities Ecosystem**: A suite of tools designed to streamline and enhance your note-taking and information processing workflows.
 
+- **[dirbuilder](https://github.com/m-c-frank/dirbuilder)** - Builds a directory structure from `tree`
 - **[workflowlibrary](https://github.com/m-c-frank/workflowlibrary)** - Centralizes and synchronizes the "Related Tools" section across the ecosystem.
 - **[noteutilsyncer](https://github.com/m-c-frank/noteutilsyncer)** - A centralized tool that automates the synchronization of the "Related Tools" section across READMEs in the noteutils ecosystem.
 - **[conceptsplitter](https://github.com/m-c-frank/conceptsplitter)** - Extract atomic concepts from a given text using the OpenAI API.
 - **[textdownloader](https://github.com/m-c-frank/textdownloader)** - A browser extension to automatically generate text dumps for processing.
+- **[contenttree](https://github.com/m-c-frank/contenttree)** - A utility to print a repository's tree structure and file content
 <!--END_TOKEN-->
 
 ## Contributing
